@@ -25,7 +25,7 @@ public class PassengerController {
     private final PassengerService passengerService;
     
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getAllPassengers(
+    public ResponseEntity<?> getAllPassengers(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -57,7 +57,7 @@ public class PassengerController {
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
+            Map<String, Object> error = new HashMap<>();
             error.put("error", "Failed to retrieve passengers");
             error.put("message", e.getMessage());
             return ResponseEntity.internalServerError().body(error);
