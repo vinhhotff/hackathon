@@ -1,0 +1,114 @@
+erDiagram
+    EMPLOYEE ||--o{ TRANSACTION : creates
+    EMPLOYEE }o--|| DEPARTMENT : belongs_to
+    
+    PASSENGER ||--o{ TICKET : owns
+    PASSENGER ||--o{ TRANSACTION : makes
+    
+    FLIGHT ||--o{ TICKET : "has tickets"
+    FLIGHT }o--|| AIRPORT : "departs from"
+    FLIGHT }o--|| AIRPORT : "arrives at"
+    FLIGHT }o--|| AIRPLANE : uses
+    FLIGHT }o--|| SHIFT : scheduled_in
+    
+    SHIFT }o--|| CREW : uses
+    
+    TRANSACTION ||--o{ TICKET : contains
+    
+    EMPLOYEE {
+        varchar empid PK "8 chars"
+        varchar firstname "30 chars"
+        varchar lastname "30 chars"
+        varchar address "100 chars"
+        varchar city "50 chars"
+        varchar zipcode "15 chars"
+        varchar telephone "10 chars"
+        varchar email "100 chars unique"
+        date admin_date
+        decimal salary "8,2"
+        integer deptid FK
+    }
+    
+    DEPARTMENT {
+        integer deptid PK
+        varchar name "50 chars"
+        varchar empid_director FK "nullable"
+    }
+    
+    PASSENGER {
+        integer clientid PK "serial"
+        varchar firstname "30 chars"
+        varchar lastname "30 chars"
+        varchar address "250 chars"
+        varchar city "50 chars"
+        varchar country "30 chars"
+        varchar zipcode "15 chars"
+        varchar telephone "18 chars"
+        varchar email "100 chars"
+    }
+    
+    FLIGHT {
+        integer flightid PK "serial"
+        date flight_date
+        time dep_time
+        time arr_time
+        integer tot_pass
+        integer tot_baggage
+        varchar flightnum "6 chars"
+        integer shiftid FK
+        varchar airplaneid FK "8 chars"
+        varchar airport_dep FK "4 chars"
+        varchar airport_arr FK "4 chars"
+    }
+    
+    TICKET {
+        varchar ticketid PK "10 chars"
+        integer buyid FK
+        integer clientid FK
+        integer flightid FK
+        varchar seatnum "3 chars"
+    }
+    
+    TRANSACTION {
+        integer achatid PK "serial"
+        date purchase_date
+        time purchase_time
+        decimal price "7,2"
+        varchar employeeid FK "8 chars"
+        integer clientid FK
+    }
+    
+    AIRPORT {
+        varchar airportid PK "4 chars"
+        varchar name "100 chars"
+        varchar address "250 chars"
+        varchar city "30 chars"
+        varchar country "30 chars"
+        varchar zipcode "15 chars"
+    }
+    
+    AIRPLANE {
+        varchar airplaneid PK "8 chars"
+        varchar type "8 chars"
+        integer num_seats
+        integer fuel_capacity
+    }
+    
+    CREW {
+        integer equipeid PK "serial"
+        integer captain
+        integer copilot
+        integer fa1
+        integer fa2
+        integer fa3
+        integer fa4
+    }
+    
+    SHIFT {
+        integer shiftid PK "serial"
+        date shift_date
+        time start_time
+        time end_time
+        integer equipeid FK
+    }
+

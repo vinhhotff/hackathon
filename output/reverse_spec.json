@@ -1,0 +1,685 @@
+{
+  "system_name": "COBOL Airlines System",
+  "description": "Hệ thống quản lý hàng không được phát triển bằng COBOL, CICS, DB2 và AS-400",
+  "entities": [
+    {
+      "name": "EMPLOYEE",
+      "module": "AS-400/DDS-DB/employee",
+      "table_type": "AS-400 DDS",
+      "description": "Bảng nhân viên trong hệ thống AS-400",
+      "fields": [
+        {"name": "EMPLOYEEID", "type": "NUMBER", "length": 10, "key": true, "not_null": true, "unique": true},
+        {"name": "PRENOM", "type": "VARCHAR", "length": 30, "key": false, "var_len": 10},
+        {"name": "NOM", "type": "VARCHAR", "length": 30, "key": false, "var_len": 10},
+        {"name": "ADRESSE", "type": "VARCHAR", "length": 250, "key": false, "var_len": 50},
+        {"name": "VILLE", "type": "VARCHAR", "length": 30, "key": false, "var_len": 10},
+        {"name": "CODEPOSTAL", "type": "VARCHAR", "length": 15, "key": false, "var_len": 10},
+        {"name": "TELEPHONE", "type": "VARCHAR", "length": 10, "key": false, "var_len": 8},
+        {"name": "EMAIL", "type": "VARCHAR", "length": 100, "key": false, "var_len": 30},
+        {"name": "ADMINDATE", "type": "DATE", "length": 10, "key": false},
+        {"name": "SALARY", "type": "DECIMAL", "precision": 8, "scale": 2, "key": false},
+        {"name": "DEPTID", "type": "NUMBER", "length": 10, "key": false, "foreignKey": "DEPT.DEPTID"}
+      ]
+    },
+    {
+      "name": "EMPLO",
+      "module": "DB2/DCLGEN/EMPLO-DCLGEN",
+      "table_type": "DB2",
+      "description": "Bảng nhân viên trong DB2",
+      "fields": [
+        {"name": "EMPID", "type": "CHAR", "length": 8, "key": true, "not_null": true},
+        {"name": "FIRSTNAME", "type": "VARCHAR", "length": 30, "key": false, "not_null": true},
+        {"name": "LASTNAME", "type": "VARCHAR", "length": 30, "key": false, "not_null": true},
+        {"name": "ADDRE", "type": "VARCHAR", "length": 100, "key": false, "not_null": true},
+        {"name": "CITY", "type": "VARCHAR", "length": 50, "key": false, "not_null": true},
+        {"name": "ZIPCODE", "type": "VARCHAR", "length": 15, "key": false, "not_null": true},
+        {"name": "TELEPHONE", "type": "VARCHAR", "length": 10, "key": false, "not_null": true},
+        {"name": "EMAIL", "type": "VARCHAR", "length": 100, "key": false, "not_null": true},
+        {"name": "ADMIDATE", "type": "DATE", "key": false, "not_null": true},
+        {"name": "SALARY", "type": "DECIMAL", "precision": 8, "scale": 2, "key": false, "not_null": true},
+        {"name": "DEPTID", "type": "INTEGER", "key": false, "not_null": true, "foreignKey": "DEPT.DEPTID"}
+      ]
+    },
+    {
+      "name": "VOL",
+      "module": "AS-400/DDS-DB/vol",
+      "table_type": "AS-400 DDS",
+      "description": "Bảng chuyến bay trong hệ thống AS-400",
+      "fields": [
+        {"name": "VOLID", "type": "NUMBER", "length": 10, "key": true, "unique": true},
+        {"name": "VOLDATE", "type": "DATE", "key": false},
+        {"name": "HSORTIE", "type": "TIME", "key": false},
+        {"name": "HARRIVEE", "type": "TIME", "key": false},
+        {"name": "TOTPASS", "type": "NUMBER", "length": 4, "key": false},
+        {"name": "TOTBAGAGE", "type": "NUMBER", "length": 4, "key": false},
+        {"name": "NBRVOL", "type": "CHAR", "length": 6, "key": false},
+        {"name": "PERSOID", "type": "NUMBER", "length": 10, "key": false},
+        {"name": "AVIONID", "type": "CHAR", "length": 8, "key": false, "foreignKey": "AVION.AVIONID"},
+        {"name": "AERSORTIE", "type": "CHAR", "length": 4, "key": false},
+        {"name": "AERARRIVEE", "type": "CHAR", "length": 4, "key": false}
+      ]
+    },
+    {
+      "name": "FLIGHT",
+      "module": "DB2/DCLGEN/FLIGHT-DCLGEN",
+      "table_type": "DB2",
+      "description": "Bảng chuyến bay trong DB2",
+      "fields": [
+        {"name": "FLIGHTID", "type": "INTEGER", "key": true, "not_null": true},
+        {"name": "FLIGHTDATE", "type": "DATE", "key": false, "not_null": true},
+        {"name": "DEPTIME", "type": "TIME", "key": false, "not_null": true},
+        {"name": "ARRTIME", "type": "TIME", "key": false, "not_null": true},
+        {"name": "TOTPASS", "type": "INTEGER", "key": false, "not_null": true},
+        {"name": "TOTBAGGA", "type": "INTEGER", "key": false, "not_null": true},
+        {"name": "FLIGHTNUM", "type": "CHAR", "length": 6, "key": false, "not_null": true},
+        {"name": "SHIFTID", "type": "INTEGER", "key": false, "not_null": true, "foreignKey": "SHIFT.SHIFTID"},
+        {"name": "AIRPLANEID", "type": "CHAR", "length": 8, "key": false, "not_null": true, "foreignKey": "AVION.AVIONID"},
+        {"name": "AIRPORTDEP", "type": "CHAR", "length": 4, "key": false, "not_null": true, "foreignKey": "AIRPORT.AIRPORTID"},
+        {"name": "AIRPORTARR", "type": "CHAR", "length": 4, "key": false, "not_null": true, "foreignKey": "AIRPORT.AIRPORTID"}
+      ]
+    },
+    {
+      "name": "PASSAGER",
+      "module": "AS-400/DDS-DB/passager",
+      "table_type": "AS-400 DDS",
+      "description": "Bảng hành khách trong hệ thống AS-400",
+      "fields": [
+        {"name": "CLIENTID", "type": "NUMBER", "length": 10, "key": true, "unique": true},
+        {"name": "PRENOM", "type": "VARCHAR", "length": 30, "key": false, "var_len": 10},
+        {"name": "NOM", "type": "VARCHAR", "length": 30, "key": false, "var_len": 15},
+        {"name": "ADRESSE", "type": "VARCHAR", "length": 250, "key": false, "var_len": 50},
+        {"name": "VILLE", "type": "VARCHAR", "length": 30, "key": false, "var_len": 10},
+        {"name": "PAYS", "type": "VARCHAR", "length": 30, "key": false, "var_len": 10},
+        {"name": "CODEPOSTAL", "type": "VARCHAR", "length": 15, "key": false, "var_len": 10},
+        {"name": "TELEPHONE", "type": "VARCHAR", "length": 20, "key": false, "var_len": 10},
+        {"name": "EMAIL", "type": "VARCHAR", "length": 100, "key": false, "var_len": 30}
+      ]
+    },
+    {
+      "name": "PASSENGERS",
+      "module": "DB2/DCLGEN/PASSENG-DCLGEN",
+      "table_type": "DB2",
+      "description": "Bảng hành khách trong DB2",
+      "fields": [
+        {"name": "CLIENTID", "type": "INTEGER", "key": true, "not_null": true},
+        {"name": "FIRSTNAME", "type": "VARCHAR", "length": 30, "key": false, "not_null": true},
+        {"name": "LASTNAME", "type": "VARCHAR", "length": 30, "key": false, "not_null": true},
+        {"name": "ADDRESS", "type": "VARCHAR", "length": 250, "key": false, "not_null": true},
+        {"name": "CITY", "type": "VARCHAR", "length": 50, "key": false, "not_null": true},
+        {"name": "COUNTRY", "type": "VARCHAR", "length": 30, "key": false, "not_null": true},
+        {"name": "ZIPCODE", "type": "VARCHAR", "length": 15, "key": false, "not_null": true},
+        {"name": "TELEPHONE", "type": "VARCHAR", "length": 18, "key": false, "not_null": true},
+        {"name": "EMAIL", "type": "VARCHAR", "length": 100, "key": false, "not_null": true}
+      ]
+    },
+    {
+      "name": "BILLET",
+      "module": "AS-400/DDS-DB/billet",
+      "table_type": "AS-400 DDS",
+      "description": "Bảng vé máy bay trong hệ thống AS-400",
+      "fields": [
+        {"name": "BILLETID", "type": "CHAR", "length": 10, "key": true, "unique": true},
+        {"name": "ACHATID", "type": "NUMBER", "length": 10, "key": false, "foreignKey": "ACHAT.ACHATID"},
+        {"name": "CLIENTID", "type": "NUMBER", "length": 10, "key": false, "foreignKey": "PASSAGER.CLIENTID"},
+        {"name": "VOLID", "type": "NUMBER", "length": 10, "key": false, "foreignKey": "VOL.VOLID"},
+        {"name": "SIEGE", "type": "CHAR", "length": 3, "key": false}
+      ]
+    },
+    {
+      "name": "TICKET",
+      "module": "DB2/DCLGEN/TICKET-DCLGEN",
+      "table_type": "DB2",
+      "description": "Bảng vé máy bay trong DB2",
+      "fields": [
+        {"name": "TICKETID", "type": "CHAR", "length": 10, "key": true, "not_null": true},
+        {"name": "BUYID", "type": "INTEGER", "key": false, "not_null": true, "foreignKey": "ACHAT.ACHATID"},
+        {"name": "CLIENTID", "type": "INTEGER", "key": false, "not_null": true, "foreignKey": "PASSENGERS.CLIENTID"},
+        {"name": "FLIGHTID", "type": "INTEGER", "key": false, "not_null": true, "foreignKey": "FLIGHT.FLIGHTID"},
+        {"name": "SEATNUM", "type": "CHAR", "length": 3, "key": false, "not_null": true}
+      ]
+    },
+    {
+      "name": "DEPT",
+      "module": "AS-400/DDS-DB/dept",
+      "table_type": "AS-400 DDS",
+      "description": "Bảng phòng ban",
+      "fields": [
+        {"name": "DEPTID", "type": "NUMBER", "length": 10, "key": true, "unique": true},
+        {"name": "NAME", "type": "VARCHAR", "length": 50, "key": false, "var_len": 10},
+        {"name": "DIRECTEUR", "type": "NUMBER", "length": 10, "key": false, "nullable": true, "foreignKey": "EMPLOYEE.EMPLOYEEID"}
+      ]
+    },
+    {
+      "name": "ACHAT",
+      "module": "AS-400/DDS-DB/ACHAT",
+      "table_type": "AS-400 DDS",
+      "description": "Bảng giao dịch mua hàng",
+      "fields": [
+        {"name": "ACHATID", "type": "NUMBER", "length": 10, "key": true, "unique": true},
+        {"name": "ACHATDATE", "type": "DATE", "key": false},
+        {"name": "ACHATHEURE", "type": "TIME", "key": false},
+        {"name": "PRIX", "type": "DECIMAL", "precision": 7, "scale": 2, "key": false},
+        {"name": "EMPLOYEID", "type": "NUMBER", "length": 10, "key": false, "foreignKey": "EMPLOYEE.EMPLOYEEID"},
+        {"name": "CLIENTID", "type": "NUMBER", "length": 10, "key": false, "foreignKey": "PASSAGER.CLIENTID"}
+      ]
+    },
+    {
+      "name": "AVION",
+      "module": "AS-400/DDS-DB/avion",
+      "table_type": "AS-400 DDS",
+      "description": "Bảng máy bay",
+      "fields": [
+        {"name": "AVIONID", "type": "CHAR", "length": 8, "key": true, "unique": true},
+        {"name": "TYPE", "type": "CHAR", "length": 8, "key": false},
+        {"name": "NBRSIEGE", "type": "NUMBER", "length": 4, "key": false},
+        {"name": "TESSENCE", "type": "NUMBER", "length": 4, "key": false}
+      ]
+    },
+    {
+      "name": "EQUIPE",
+      "module": "AS-400/DDS-DB/Equipage",
+      "table_type": "AS-400 DDS",
+      "description": "Bảng tổ bay",
+      "fields": [
+        {"name": "EQUIPEID", "type": "NUMBER", "length": 10, "key": true, "unique": true},
+        {"name": "CAPITAINE", "type": "NUMBER", "length": 10, "key": false},
+        {"name": "COPILITE", "type": "NUMBER", "length": 10, "key": false},
+        {"name": "FARESP", "type": "NUMBER", "length": 10, "key": false},
+        {"name": "FA2", "type": "NUMBER", "length": 10, "key": false},
+        {"name": "FA3", "type": "NUMBER", "length": 10, "key": false},
+        {"name": "FA4", "type": "NUMBER", "length": 10, "key": false}
+      ]
+    },
+    {
+      "name": "SHIFT",
+      "module": "AS-400/DDS-DB/shift",
+      "table_type": "AS-400 DDS",
+      "description": "Bảng ca làm việc",
+      "fields": [
+        {"name": "SHIFTID", "type": "NUMBER", "length": 10, "key": true, "unique": true},
+        {"name": "SHIFTDATE", "type": "DATE", "key": false},
+        {"name": "HEUREDEBUT", "type": "TIME", "key": false},
+        {"name": "HEUREFIN", "type": "TIME", "key": false},
+        {"name": "EQUIPEID", "type": "NUMBER", "length": 10, "key": false, "foreignKey": "EQUIPE.EQUIPEID"}
+      ]
+    },
+    {
+      "name": "AIRPORT",
+      "module": "DB2/DCLGEN/AIRPORT-DCLGEN",
+      "table_type": "DB2",
+      "description": "Bảng sân bay",
+      "fields": [
+        {"name": "AIRPORTID", "type": "CHAR", "length": 4, "key": true, "not_null": true},
+        {"name": "NAME", "type": "VARCHAR", "length": 100, "key": false, "not_null": true},
+        {"name": "ADDRESS", "type": "VARCHAR", "length": 250, "key": false, "not_null": true},
+        {"name": "CITY", "type": "VARCHAR", "length": 30, "key": false, "not_null": true},
+        {"name": "COUNTRY", "type": "VARCHAR", "length": 30, "key": false, "not_null": true},
+        {"name": "ZIPCODE", "type": "VARCHAR", "length": 15, "key": false, "not_null": true}
+      ]
+    }
+  ],
+  "usecases": [
+    {
+      "name": "Login",
+      "module": "CICS/LOGIN/LOGIN-COB",
+      "description": "Xác thực người dùng và điều hướng theo phòng ban",
+      "input": [
+        {"name": "USERID", "type": "CHAR", "length": 8, "required": true},
+        {"name": "PASSWORD", "type": "CHAR", "length": 8, "required": true}
+      ],
+      "output": [
+        {"name": "AUTH_TOKEN", "type": "CHAR", "length": 8},
+        {"name": "DEPT_ROUTING", "type": "NUMBER", "description": "Điều hướng theo DEPTID: 1=CEO, 2-4=Crew, 5=HR, 6=IT, 7=Sales, 8=Lawyer, 9=Schedule"}
+      ],
+      "business_logic": [
+        "Kiểm tra USERID trong bảng EMPLO",
+        "Mã hóa password bằng chương trình CRYPTO-VERIFICATION",
+        "So sánh password đã mã hóa với file PASSDOC",
+        "Nếu đúng: lấy DEPTID và điều hướng đến map tương ứng",
+        "Nếu sai: hiển thị thông báo lỗi"
+      ]
+    },
+    {
+      "name": "SearchFlight",
+      "module": "CICS/SALES-MAP/SRCHFLY-COB",
+      "description": "Tìm kiếm chuyến bay theo nhiều tiêu chí",
+      "input": [
+        {"name": "FLIGHTNUM", "type": "CHAR", "length": 6, "required": false},
+        {"name": "FLIGHTDATE", "type": "DATE", "format": "YYYY-MM-DD", "required": false},
+        {"name": "AIRPORTDEP", "type": "CHAR", "length": 4, "required": false},
+        {"name": "AIRPORTARR", "type": "CHAR", "length": 4, "required": false}
+      ],
+      "output": [
+        {"name": "list_of_flights", "type": "TABLE", "max_rows": 10, "fields": ["FLIGHTNUM", "FLIGHTDATE", "DEPTIME", "ARRTIME", "AIRPORTDEP", "AIRPORTARR", "TOTPASS"]}
+      ],
+      "search_criteria": [
+        "FLIGHTNUM only",
+        "FLIGHTDATE only",
+        "FLIGHTDATE + FLIGHTNUM",
+        "FLIGHTDATE + AIRPORTDEP",
+        "FLIGHTDATE + AIRPORTARR",
+        "FLIGHTDATE + AIRPORTDEP + AIRPORTARR"
+      ]
+    },
+    {
+      "name": "SearchTicket",
+      "module": "CICS/SALES-MAP/SRCHTKT-COB",
+      "description": "Tìm kiếm vé máy bay theo nhiều tiêu chí",
+      "input": [
+        {"name": "TICKETID", "type": "CHAR", "length": 10, "required": false},
+        {"name": "CLIENTID", "type": "INTEGER", "required": false},
+        {"name": "FIRSTNAME", "type": "VARCHAR", "length": 30, "required": false},
+        {"name": "LASTNAME", "type": "VARCHAR", "length": 30, "required": false},
+        {"name": "FLIGHTNUM", "type": "CHAR", "length": 6, "required": false},
+        {"name": "FLIGHTDATE", "type": "DATE", "format": "YYYY-MM-DD", "required": false}
+      ],
+      "output": [
+        {"name": "ticket_details", "type": "TABLE", "max_rows": 20, "fields": ["TICKETID", "SEATNUM", "FIRSTNAME", "LASTNAME", "FLIGHTDATE", "DEPTIME", "ARRTIME", "FLIGHTNUM", "AIRPORTDEP", "AIRPORTARR"]}
+      ],
+      "search_criteria": [
+        "TICKETID",
+        "CLIENTID",
+        "CLIENTID + FLIGHTNUM",
+        "CLIENTID + FLIGHTDATE",
+        "FIRSTNAME + LASTNAME",
+        "FIRSTNAME + LASTNAME + FLIGHTNUM",
+        "FIRSTNAME + LASTNAME + FLIGHTDATE"
+      ],
+      "features": [
+        "Pagination support (F10=Previous, F11=Next)",
+        "Print ticket function (F12)"
+      ]
+    },
+    {
+      "name": "SellTicket",
+      "module": "CICS/SALES-MAP/SELL1-COB, SELL2-MAP",
+      "description": "Bán vé máy bay cho hành khách",
+      "input": [
+        {"name": "CLIENTID", "type": "INTEGER", "required": true},
+        {"name": "FLIGHTNUM", "type": "CHAR", "length": 6, "required": true},
+        {"name": "FLIGHTDATE", "type": "DATE", "format": "YYYY-MM-DD", "required": true},
+        {"name": "PASSENGER_COUNT", "type": "NUMBER", "required": true}
+      ],
+      "output": [
+        {"name": "FLIGHT_DETAILS", "type": "OBJECT", "fields": ["FLIGHTID", "DEPTIME", "ARRTIME", "AIRPORTDEP", "AIRPORTARR", "PRICE", "TOTAL_PRICE"]},
+        {"name": "PASSENGER_DETAILS", "type": "OBJECT", "fields": ["FIRSTNAME", "LASTNAME"]}
+      ],
+      "process_flow": [
+        "Bước 1 (SELL1): Nhập CLIENTID, FLIGHTNUM, DATE, số lượng hành khách",
+        "Kiểm tra hành khách tồn tại trong PASSENGERS",
+        "Kiểm tra chuyến bay tồn tại trong FLIGHT",
+        "Tính giá vé: TOTAL_PRICE = UNIT_PRICE * PASSENGER_COUNT",
+        "Bước 2 (SELL2): Xác nhận và nhập thông tin hành khách chi tiết",
+        "Tạo bản ghi trong bảng ACHAT",
+        "Tạo bản ghi trong bảng TICKET"
+      ]
+    },
+    {
+      "name": "PrintTicket",
+      "module": "CICS/SALES-MAP/PRINT-TICKET-COB",
+      "description": "In vé máy bay",
+      "input": [
+        {"name": "FULL_NAME", "type": "VARCHAR", "length": 45},
+        {"name": "SEAT", "type": "CHAR", "length": 3},
+        {"name": "FLIGHTNUM", "type": "CHAR", "length": 6},
+        {"name": "AIRPORTDEP", "type": "CHAR", "length": 4},
+        {"name": "AIRPORTARR", "type": "CHAR", "length": 4},
+        {"name": "FLIGHTDATE", "type": "DATE"},
+        {"name": "DEPARTURE_TIME", "type": "TIME"}
+      ],
+      "output": [
+        {"name": "PRINTED_TICKET", "type": "DOCUMENT", "format": "JCL_SPOOL"}
+      ],
+      "technology": "COBOL + JCL Spool"
+    },
+    {
+      "name": "PrintReceipt",
+      "module": "CICS/SALES-MAP/RECEIPT-COB",
+      "description": "In hóa đơn thanh toán",
+      "input": [
+        {"name": "BUYID", "type": "INTEGER"},
+        {"name": "TOTAL_PRICE", "type": "DECIMAL", "precision": 7, "scale": 2}
+      ],
+      "output": [
+        {"name": "PRINTED_RECEIPT", "type": "DOCUMENT", "format": "JCL_SPOOL"}
+      ]
+    },
+    {
+      "name": "InsertEmployee",
+      "module": "COB-PROG/EMPLO-INSERT/EMPLO-MAIN-INSERT",
+      "description": "Nhập dữ liệu nhân viên từ file JSON",
+      "input": [
+        {"name": "JSON_FILE", "type": "FILE", "format": "JSON", "structure": "EMPLOYEE-LIST.json"}
+      ],
+      "output": [
+        {"name": "INSERTED_RECORDS", "type": "TABLE", "target": "EMPLO"},
+        {"name": "ENCRYPTED_PASSWORDS", "type": "FILE", "target": "PASSDOC"}
+      ],
+      "process": [
+        "Đọc file JSON qua subprogram EMPLO-LECTURE-JSON",
+        "Mã hóa password qua EMPLO-CRYPTO-PASS",
+        "Ghi password đã mã hóa vào PASSDOC",
+        "Insert từng record vào bảng EMPLO"
+      ]
+    },
+    {
+      "name": "InsertPassenger",
+      "module": "COB-PROG/PASSENGER-INSERT/PASSENGER-INSERT-MAINPROG",
+      "description": "Nhập dữ liệu hành khách từ file XML",
+      "input": [
+        {"name": "XML_FILE", "type": "FILE", "format": "XML", "structure": "PASSENGER*.xml"}
+      ],
+      "output": [
+        {"name": "INSERTED_RECORDS", "type": "TABLE", "target": "PASSENGERS"}
+      ],
+      "process": [
+        "Đọc file XML qua subprogram PASSENGER-SUXML-SUBPROG",
+        "Parse XML và chuyển đổi sang COBOL structure",
+        "Tính toán độ dài thực tế của các VARCHAR fields",
+        "Insert từng record vào bảng PASSENGERS"
+      ]
+    },
+    {
+      "name": "DuplicateFlight",
+      "module": "COB-PROG/FLIGHT-DUPLICATE/FLIGHT-DUPLICATE-COB",
+      "description": "Nhân đôi dữ liệu chuyến bay cho cả tháng",
+      "input": [
+        {"name": "FLIGHTNUM", "type": "CHAR", "length": 6, "required": true},
+        {"name": "BASE_DATE", "type": "DATE", "required": true}
+      ],
+      "output": [
+        {"name": "DUPLICATED_FLIGHTS", "type": "TABLE", "target": "FLIGHT", "description": "Tạo các bản ghi cho tất cả các ngày trong tháng"}
+      ],
+      "process": [
+        "Lấy thông tin chuyến bay từ FLIGHTNUM",
+        "Tính số ngày trong tháng",
+        "Tạo các bản ghi mới với cùng thông tin nhưng thay đổi ngày",
+        "Insert vào bảng FLIGHT"
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "RULE_001",
+      "name": "Password Encryption",
+      "description": "Mã hóa mật khẩu sử dụng thuật toán tùy chỉnh",
+      "module": "CICS/LOGIN/CRYPTO-VERIFICATION",
+      "logic": "Sử dụng USERID, PASSWORD và ADMIDATE để tạo key mã hóa. Mã hóa từng ký tự dựa trên MOD(COUNTER, 3) với các phép tính khác nhau",
+      "implementation": "COMPUTE WS-KEY = FUNCTION RANDOM(WS-DATE) * 1000; WS-PASS * WS-KEY hoặc WS-PASS * WS-USERID * WS-KEY"
+    },
+    {
+      "id": "RULE_002",
+      "name": "Price Calculation",
+      "description": "Tính giá vé tổng",
+      "module": "CICS/SALES-MAP/SELL1-COB",
+      "logic": "TOTAL_PRICE = UNIT_PRICE * NUMBER_OF_PASSENGERS",
+      "implementation": "COMPUTE WS-TOTPRICE = WS-PRICEV * PASSNI",
+      "note": "Unit price hiện tại được hardcode là 120.99, có comment về việc nên gọi chương trình tính giá riêng"
+    },
+    {
+      "id": "RULE_003",
+      "name": "Department Routing",
+      "description": "Điều hướng người dùng theo phòng ban sau khi đăng nhập",
+      "module": "CICS/LOGIN/LOGIN-COB",
+      "logic": "Dựa vào DEPTID để xác định chức năng/map người dùng được truy cập",
+      "mapping": {
+        "1": "CEO MAP (not available)",
+        "2-4": "CREW MAP (not available)",
+        "5": "HR MAP (not available)",
+        "6": "IT MAP (not available)",
+        "7": "SRCHFLI (Search Flight - available)",
+        "8": "LAWYER MAP (not available)",
+        "9": "SCHEDULE MAP (not available)"
+      }
+    },
+    {
+      "id": "RULE_004",
+      "name": "Date Format Validation",
+      "description": "Kiểm tra định dạng ngày tháng",
+      "module": "CICS/SALES-MAP/SRCHFLY-COB, SRCHTKT-COB",
+      "logic": "Ngày phải có định dạng YYYY-MM-DD",
+      "validation": [
+        "FDATEI(1:4) phải là số (năm)",
+        "FDATEI(6:2) phải là số (tháng)",
+        "FDATEI(9:2) phải là số (ngày)",
+        "FDATEI(5:1) phải là '-'",
+        "FDATEI(8:1) phải là '-'"
+      ],
+      "error_message": "WRONG DATE FORMAT, TRY TO INSERT DATE AS YYYY-MM-DD"
+    },
+    {
+      "id": "RULE_005",
+      "name": "Client ID Validation",
+      "description": "Kiểm tra CLIENTID hợp lệ",
+      "module": "CICS/SALES-MAP/SELL1-COB",
+      "logic": "CLIENTID phải là số và khác 0",
+      "validation": "CLIIDO IS NOT NUMERIC OR CLIENTID = 0",
+      "error_message": "YOU MUST INSERT A NUMBER IN THE CLIENTID"
+    },
+    {
+      "id": "RULE_006",
+      "name": "Flight Number Validation",
+      "description": "Kiểm tra số chuyến bay không được rỗng",
+      "module": "CICS/SALES-MAP/SELL1-COB",
+      "logic": "FLIGHTNUM không được là SPACE",
+      "validation": "FNUMO = SPACE",
+      "error_message": "YOU MUST INSERT A CORRECT FIGHT NUMBER"
+    },
+    {
+      "id": "RULE_007",
+      "name": "Passenger Count Validation",
+      "description": "Kiểm tra số lượng hành khách",
+      "module": "CICS/SALES-MAP/SELL1-COB",
+      "logic": "PASSENGER_COUNT phải là số và > 0",
+      "validation": "PASSNO IS NOT NUMERIC OR PASSNO = 0",
+      "error_message": "YOU MUST INSERT A NUMBER IN THE NUMBER OF CLIENTS"
+    },
+    {
+      "id": "RULE_008",
+      "name": "Search Validation - Ticket",
+      "description": "Yêu cầu tối thiểu để tìm kiếm vé",
+      "module": "CICS/SALES-MAP/SRCHTKT-COB",
+      "logic": "Phải có ít nhất một trong các thông tin: TICKETID, CLIENTID, hoặc (FIRSTNAME + LASTNAME)",
+      "error_message": "A VALIDE RESEARCHS MUST HAVE AT LEAST: TICKETID OR CLIENTID OR CLIENT'S FIRST AND LAST NAME"
+    },
+    {
+      "id": "RULE_009",
+      "name": "VARCHAR Length Calculation",
+      "description": "Tính độ dài thực tế của VARCHAR field",
+      "module": "COB-PROG/PASSENGER-INSERT/PASSENGER-INSERT-MAINPROG",
+      "logic": "Đếm số ký tự không phải SPACE để xác định độ dài thực tế",
+      "implementation": "INSPECT field TALLYING COUNT2 FOR ALL SPACES; COMPUTE COUNT3 = MAX_LENGTH - COUNT2; MOVE COUNT3 TO field_LEN"
+    },
+    {
+      "id": "RULE_010",
+      "name": "Flight Duplication - Month Days",
+      "description": "Tính số ngày trong tháng để nhân đôi chuyến bay",
+      "module": "COB-PROG/FLIGHT-DUPLICATE/FLIGHT-DUPLICATE-COB",
+      "logic": "Sử dụng bảng số ngày trong tháng: '312831303130313130313031' (12 tháng)",
+      "implementation": "MOVE '312831303130313130313031' TO MONTH; REDEFINES thành WS-MONTH(1-12); Sử dụng WS-MONTH(9) để lấy số ngày tháng 9"
+    },
+    {
+      "id": "RULE_011",
+      "name": "SQL Error Handling",
+      "description": "Xử lý lỗi SQL một cách thống nhất",
+      "modules": ["CICS/SALES-MAP/SRCHFLY-COB", "CICS/SALES-MAP/SRCHTKT-COB", "CICS/SALES-MAP/SELL1-COB"],
+      "logic": "Kiểm tra SQLCODE: 0=Success, 100=No data found, Other=Error",
+      "error_handling": [
+        "SQLCODE = 0: Tiếp tục xử lý",
+        "SQLCODE = 100: Hiển thị 'NO DATA FOUND' hoặc thông báo tương ứng",
+        "SQLCODE khác: Hiển thị 'COMMUNICATION ERROR', log SQLCODE và SQLSTATE"
+      ]
+    },
+    {
+      "id": "RULE_012",
+      "name": "Pagination",
+      "description": "Phân trang kết quả tìm kiếm",
+      "module": "CICS/SALES-MAP/SRCHTKT-COB",
+      "logic": "Hỗ trợ phân trang với F10=Previous, F11=Next",
+      "implementation": "Lưu tất cả kết quả vào WS-TABLE-TICKET-R (20 records), dùng WS-F11 để track page hiện tại",
+      "validation": [
+        "F10: Kiểm tra WS-F11 > 1, nếu không có trang trước",
+        "F11: Kiểm tra WS-F11 < WS-TPAGE, nếu không có trang sau"
+      ]
+    },
+    {
+      "id": "RULE_013",
+      "name": "Time Adjustment",
+      "description": "Điều chỉnh giờ hiển thị (UTC+1)",
+      "modules": ["CICS/LOGIN/LOGIN-COB", "CICS/SALES-MAP/SELL1-COB"],
+      "logic": "Nếu giờ = 23 thì chuyển về 0, ngược lại cộng thêm 1",
+      "implementation": "IF WS-HOUR = 23 THEN MOVE ZEROS TO WS-HOUR ELSE ADD 1 TO WS-HOUR"
+    },
+    {
+      "id": "RULE_014",
+      "name": "Sell Workflow Validation",
+      "description": "Kiểm tra điều kiện để chuyển sang bước bán vé",
+      "module": "CICS/SALES-MAP/SELL1-COB",
+      "logic": "Phải thực hiện tìm kiếm hợp lệ trước khi chuyển sang SELL2",
+      "validation": "WS-FLAG-MOUV = 'Y' (đã tìm kiếm thành công)",
+      "error_message": "YOU NEED TO MAKE A VAIBLE REASEARC BEFORE GO TO THE SELL SCREEN"
+    }
+  ],
+  "relationships": [
+    {
+      "from": "EMPLOYEE",
+      "to": "DEPT",
+      "type": "many-to-one",
+      "field": "DEPTID",
+      "description": "Mỗi nhân viên thuộc một phòng ban"
+    },
+    {
+      "from": "VOL",
+      "to": "AVION",
+      "type": "many-to-one",
+      "field": "AVIONID",
+      "description": "Mỗi chuyến bay sử dụng một máy bay"
+    },
+    {
+      "from": "BILLET",
+      "to": "ACHAT",
+      "type": "many-to-one",
+      "field": "ACHATID",
+      "description": "Mỗi vé thuộc một giao dịch mua"
+    },
+    {
+      "from": "BILLET",
+      "to": "PASSAGER",
+      "type": "many-to-one",
+      "field": "CLIENTID",
+      "description": "Mỗi vé thuộc một hành khách"
+    },
+    {
+      "from": "BILLET",
+      "to": "VOL",
+      "type": "many-to-one",
+      "field": "VOLID",
+      "description": "Mỗi vé thuộc một chuyến bay"
+    },
+    {
+      "from": "ACHAT",
+      "to": "EMPLOYEE",
+      "type": "many-to-one",
+      "field": "EMPLOYEID",
+      "description": "Mỗi giao dịch được thực hiện bởi một nhân viên"
+    },
+    {
+      "from": "ACHAT",
+      "to": "PASSAGER",
+      "type": "many-to-one",
+      "field": "CLIENTID",
+      "description": "Mỗi giao dịch thuộc một khách hàng"
+    },
+    {
+      "from": "FLIGHT",
+      "to": "SHIFT",
+      "type": "many-to-one",
+      "field": "SHIFTID",
+      "description": "Mỗi chuyến bay thuộc một ca làm việc"
+    },
+    {
+      "from": "FLIGHT",
+      "to": "AVION",
+      "type": "many-to-one",
+      "field": "AIRPLANEID",
+      "description": "Mỗi chuyến bay sử dụng một máy bay"
+    },
+    {
+      "from": "FLIGHT",
+      "to": "AIRPORT",
+      "type": "many-to-one",
+      "field": "AIRPORTDEP",
+      "description": "Mỗi chuyến bay xuất phát từ một sân bay",
+      "relationship_name": "DEPARTURE"
+    },
+    {
+      "from": "FLIGHT",
+      "to": "AIRPORT",
+      "type": "many-to-one",
+      "field": "AIRPORTARR",
+      "description": "Mỗi chuyến bay đến một sân bay",
+      "relationship_name": "ARRIVAL"
+    },
+    {
+      "from": "TICKET",
+      "to": "PASSENGERS",
+      "type": "many-to-one",
+      "field": "CLIENTID",
+      "description": "Mỗi vé thuộc một hành khách"
+    },
+    {
+      "from": "TICKET",
+      "to": "FLIGHT",
+      "type": "many-to-one",
+      "field": "FLIGHTID",
+      "description": "Mỗi vé thuộc một chuyến bay"
+    },
+    {
+      "from": "SHIFT",
+      "to": "EQUIPE",
+      "type": "many-to-one",
+      "field": "EQUIPEID",
+      "description": "Mỗi ca làm việc sử dụng một tổ bay"
+    }
+  ],
+  "technology_stack": {
+    "programming_language": "COBOL",
+    "transaction_system": "CICS",
+    "database": ["DB2", "AS-400 DDS"],
+    "ui_framework": "CICS Maps (DFHMSD)",
+    "file_formats": ["JSON", "XML", "Sequential Files"],
+    "platform": "IBM z/OS / AS-400"
+  },
+  "modules": [
+    {
+      "name": "LOGIN",
+      "path": "CICS/LOGIN/",
+      "files": ["LOGIN-COB", "LOGINMAP", "CRYPTO-VERIFICATION"],
+      "purpose": "Xác thực người dùng và điều hướng"
+    },
+    {
+      "name": "SALES",
+      "path": "CICS/SALES-MAP/",
+      "files": ["SELL1-COB", "SELL1-MAP", "SELL2-MAP", "SRCHFLY-COB", "SRCHFLI-MAP", "SRCHTKT-COB", "SRCHTKT-MAP", "PRINT-TICKET-COB", "RECEIPT-COB"],
+      "purpose": "Quản lý bán vé, tìm kiếm chuyến bay/vé, in vé và hóa đơn"
+    },
+    {
+      "name": "EMPLO_INSERT",
+      "path": "COB-PROG/EMPLO-INSERT/",
+      "files": ["EMPLO-MAIN-INSERT", "EMPLO-LECTURE-JSON", "EMPLO-CRYPTO-PASS", "EMPLO-OUTPUT-PASS-CRYPT"],
+      "purpose": "Nhập dữ liệu nhân viên từ JSON"
+    },
+    {
+      "name": "PASSENGER_INSERT",
+      "path": "COB-PROG/PASSENGER-INSERT/",
+      "files": ["PASSENGER-INSERT-MAINPROG", "PASSENGER-SUXML-SUBPROG"],
+      "purpose": "Nhập dữ liệu hành khách từ XML"
+    },
+    {
+      "name": "FLIGHT_DUPLICATE",
+      "path": "COB-PROG/FLIGHT-DUPLICATE/",
+      "files": ["FLIGHT-DUPLICATE-COB"],
+      "purpose": "Nhân đôi dữ liệu chuyến bay"
+    }
+  ]
+}

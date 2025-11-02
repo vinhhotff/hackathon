@@ -1,0 +1,1506 @@
+openapi: 3.0.3
+info:
+  title: COBOL Airlines System API
+  description: |
+    RESTful API for COBOL Airlines System - Modernized from legacy COBOL/CICS/DB2 system.
+    
+    This API provides endpoints for:
+    - Authentication and authorization
+    - Flight search and management
+    - Passenger management
+    - Ticket booking and sales
+    - Employee administration
+    - Transaction and receipt management
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: api-support@cobol-airlines.com
+  license:
+    name: Proprietary
+    url: https://cobol-airlines.com/license
+
+servers:
+  - url: http://localhost:8080/api
+    description: Development server
+  - url: https://api.cobol-airlines.com/api
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Flights
+    description: Flight search and management
+  - name: Tickets
+    description: Ticket booking and search
+  - name: Passengers
+    description: Passenger information management
+  - name: Employees
+    description: Employee administration
+  - name: Transactions
+    description: Transaction and receipt management
+  - name: Airports
+    description: Airport information
+  - name: Admin
+    description: Administrative operations
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user with USERID and password, returns JWT token
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              userId: "EMP00001"
+              password: "password123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorCode: "ERR_001"
+                message: "PASSWORD OR USERID INCORRECT"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      description: Logout current user (invalidates token)
+      operationId: logout
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user info
+      description: Returns current authenticated user information
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+
+  /flights:
+    get:
+      tags:
+        - Flights
+      summary: Search flights
+      description: Search flights with multiple criteria. Returns up to 10 flights per page.
+      operationId: searchFlights
+      parameters:
+        - name: flightNum
+          in: query
+          description: Flight number (6 characters)
+          required: false
+          schema:
+            type: string
+            maxLength: 6
+        - name: flightDate
+          in: query
+          description: Flight date (YYYY-MM-DD format)
+          required: false
+          schema:
+            type: string
+            format: date
+            pattern: '^\d{4}-\d{2}-\d{2}$'
+        - name: airportDep
+          in: query
+          description: Departure airport code (4 characters)
+          required: false
+          schema:
+            type: string
+            maxLength: 4
+        - name: airportArr
+          in: query
+          description: Arrival airport code (4 characters)
+          required: false
+          schema:
+            type: string
+            maxLength: 4
+        - name: page
+          in: query
+          description: Page number (default: 1)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          description: Page size (default: 10, max: 10)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 10
+      responses:
+        '200':
+          description: List of flights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightSearchResponse'
+        '400':
+          description: Invalid date format or parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorCode: "ERR_002"
+                message: "WRONG DATE FORMAT, TRY TO INSERT DATE AS YYYY-MM-DD"
+
+    post:
+      tags:
+        - Flights
+      summary: Create flight
+      description: Create a new flight (Admin only)
+      operationId: createFlight
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlightCreateRequest'
+      responses:
+        '201':
+          description: Flight created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Flight'
+        '403':
+          description: Forbidden - Admin access required
+        '400':
+          description: Bad request
+
+  /flights/{flightId}:
+    get:
+      tags:
+        - Flights
+      summary: Get flight details
+      description: Get detailed information about a specific flight
+      operationId: getFlight
+      parameters:
+        - name: flightId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Flight details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightDetail'
+        '404':
+          description: Flight not found
+
+    put:
+      tags:
+        - Flights
+      summary: Update flight
+      description: Update flight information (Admin only)
+      operationId: updateFlight
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: flightId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlightUpdateRequest'
+      responses:
+        '200':
+          description: Flight updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Flight'
+        '404':
+          description: Flight not found
+
+  /flights/{flightId}/duplicate-month:
+    post:
+      tags:
+        - Flights
+        - Admin
+      summary: Duplicate flights for month
+      description: Duplicate a flight template for all days in a month (Admin/Schedule only)
+      operationId: duplicateFlightsForMonth
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: flightId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - baseDate
+              properties:
+                baseDate:
+                  type: string
+                  format: date
+                  description: Base date for month calculation
+      responses:
+        '200':
+          description: Flights duplicated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  createdCount:
+                    type: integer
+                  flights:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Flight'
+
+  /tickets:
+    get:
+      tags:
+        - Tickets
+      summary: Search tickets
+      description: |
+        Search tickets with multiple criteria. At least one identifier required:
+        - ticketId, OR
+        - clientId, OR
+        - (firstName + lastName)
+      operationId: searchTickets
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ticketId
+          in: query
+          description: Ticket ID
+          required: false
+          schema:
+            type: string
+            maxLength: 10
+        - name: clientId
+          in: query
+          description: Client ID
+          required: false
+          schema:
+            type: integer
+        - name: firstName
+          in: query
+          description: Passenger first name
+          required: false
+          schema:
+            type: string
+            maxLength: 30
+        - name: lastName
+          in: query
+          description: Passenger last name
+          required: false
+          schema:
+            type: string
+            maxLength: 30
+        - name: flightNum
+          in: query
+          description: Flight number
+          required: false
+          schema:
+            type: string
+            maxLength: 6
+        - name: flightDate
+          in: query
+          description: Flight date (YYYY-MM-DD)
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          description: Page number (default: 1)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          description: Page size (default: 20, max: 20)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 20
+      responses:
+        '200':
+          description: List of tickets with pagination
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketSearchResponse'
+        '400':
+          description: Invalid search criteria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errorCode: "ERR_008"
+                message: "A VALIDE RESEARCHS MUST HAVE AT LEAST: TICKETID OR CLIENTID OR CLIENT'S FIRST AND LAST NAME"
+
+    post:
+      tags:
+        - Tickets
+      summary: Create booking (Sell Ticket)
+      description: Create a new booking. This is a two-step process: validate first, then confirm.
+      operationId: createBooking
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+      responses:
+        '201':
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidClient:
+                  value:
+                    errorCode: "ERR_003"
+                    message: "YOU MUST INSERT A NUMBER IN THE CLIENTID"
+                insufficientSeats:
+                  value:
+                    errorCode: "ERR_006"
+                    message: "Not enough seats available"
+        '404':
+          description: Flight or passenger not found
+
+  /tickets/{ticketId}:
+    get:
+      tags:
+        - Tickets
+      summary: Get ticket details
+      description: Get detailed information about a specific ticket
+      operationId: getTicket
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ticketId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ticket details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketDetail'
+        '404':
+          description: Ticket not found
+
+  /tickets/{ticketId}/print:
+    get:
+      tags:
+        - Tickets
+      summary: Print ticket
+      description: Generate printable ticket document (PDF)
+      operationId: printTicket
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ticketId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: PDF document
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+  /passengers:
+    get:
+      tags:
+        - Passengers
+      summary: Search passengers
+      description: Search passengers by various criteria
+      operationId: searchPassengers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientId
+          in: query
+          schema:
+            type: integer
+        - name: firstName
+          in: query
+          schema:
+            type: string
+        - name: lastName
+          in: query
+          schema:
+            type: string
+        - name: email
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of passengers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  passengers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Passenger'
+
+    post:
+      tags:
+        - Passengers
+      summary: Create passenger
+      description: Create a new passenger record
+      operationId: createPassenger
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PassengerCreateRequest'
+      responses:
+        '201':
+          description: Passenger created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Passenger'
+
+  /passengers/{clientId}:
+    get:
+      tags:
+        - Passengers
+      summary: Get passenger details
+      description: Get detailed passenger information
+      operationId: getPassenger
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Passenger details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Passenger'
+        '404':
+          description: Passenger not found
+
+    put:
+      tags:
+        - Passengers
+      summary: Update passenger
+      description: Update passenger information
+      operationId: updatePassenger
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PassengerUpdateRequest'
+      responses:
+        '200':
+          description: Passenger updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Passenger'
+
+  /passengers/import-xml:
+    post:
+      tags:
+        - Passengers
+        - Admin
+      summary: Import passengers from XML
+      description: Bulk import passengers from XML file
+      operationId: importPassengersXML
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Import completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  importedCount:
+                    type: integer
+                  errors:
+                    type: array
+                    items:
+                      type: object
+
+  /employees:
+    get:
+      tags:
+        - Employees
+      summary: List employees
+      description: Get list of employees (HR/Admin only)
+      operationId: listEmployees
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: deptId
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of employees
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  employees:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Employee'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags:
+        - Employees
+      summary: Create employee
+      description: Create a new employee (HR/Admin only)
+      operationId: createEmployee
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeCreateRequest'
+      responses:
+        '201':
+          description: Employee created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+
+  /employees/{empId}:
+    get:
+      tags:
+        - Employees
+      summary: Get employee details
+      description: Get detailed employee information
+      operationId: getEmployee
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: empId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Employee details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+        '404':
+          description: Employee not found
+
+    put:
+      tags:
+        - Employees
+      summary: Update employee
+      description: Update employee information (HR/Admin only)
+      operationId: updateEmployee
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: empId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeUpdateRequest'
+      responses:
+        '200':
+          description: Employee updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+
+  /employees/import-json:
+    post:
+      tags:
+        - Employees
+        - Admin
+      summary: Import employees from JSON
+      description: Bulk import employees from JSON file. Passwords are encrypted automatically.
+      operationId: importEmployeesJSON
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Import completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  importedCount:
+                    type: integer
+                  errors:
+                    type: array
+                    items:
+                      type: object
+
+  /transactions/{transactionId}:
+    get:
+      tags:
+        - Transactions
+      summary: Get transaction details
+      description: Get detailed transaction information
+      operationId: getTransaction
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Transaction details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '404':
+          description: Transaction not found
+
+  /transactions/{transactionId}/receipt:
+    get:
+      tags:
+        - Transactions
+      summary: Print receipt
+      description: Generate printable receipt document (PDF)
+      operationId: printReceipt
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: PDF document
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+  /airports:
+    get:
+      tags:
+        - Airports
+      summary: List airports
+      description: Get list of all airports
+      operationId: listAirports
+      responses:
+        '200':
+          description: List of airports
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  airports:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Airport'
+
+  /airports/{airportId}:
+    get:
+      tags:
+        - Airports
+      summary: Get airport details
+      description: Get detailed airport information
+      operationId: getAirport
+      parameters:
+        - name: airportId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 4
+      responses:
+        '200':
+          description: Airport details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Airport'
+        '404':
+          description: Airport not found
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - userId
+        - password
+      properties:
+        userId:
+          type: string
+          maxLength: 8
+          description: Employee ID
+          example: "EMP00001"
+        password:
+          type: string
+          maxLength: 8
+          description: Password
+          example: "password123"
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT authentication token
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        user:
+          $ref: '#/components/schemas/Employee'
+
+    ErrorResponse:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          example: "ERR_001"
+        message:
+          type: string
+          example: "Error message here"
+        timestamp:
+          type: string
+          format: date-time
+        details:
+          type: object
+          additionalProperties: true
+
+    Employee:
+      type: object
+      properties:
+        empId:
+          type: string
+          maxLength: 8
+          example: "EMP00001"
+        firstName:
+          type: string
+          maxLength: 30
+          example: "John"
+        lastName:
+          type: string
+          maxLength: 30
+          example: "Doe"
+        address:
+          type: string
+          maxLength: 100
+          example: "123 Main Street"
+        city:
+          type: string
+          maxLength: 50
+          example: "Paris"
+        zipCode:
+          type: string
+          maxLength: 15
+          example: "75001"
+        telephone:
+          type: string
+          maxLength: 10
+          example: "0123456789"
+        email:
+          type: string
+          maxLength: 100
+          example: "john.doe@airlines.com"
+        adminDate:
+          type: string
+          format: date
+          example: "2024-01-15"
+        salary:
+          type: number
+          format: double
+          example: 50000.00
+        deptId:
+          type: integer
+          description: Department ID (1=CEO, 2-4=Crew, 5=HR, 6=IT, 7=Sales, 8=Lawyer, 9=Schedule)
+          example: 7
+
+    EmployeeCreateRequest:
+      type: object
+      required:
+        - empId
+        - firstName
+        - lastName
+        - address
+        - city
+        - zipCode
+        - telephone
+        - email
+        - adminDate
+        - salary
+        - deptId
+        - password
+      properties:
+        empId:
+          type: string
+          maxLength: 8
+        firstName:
+          type: string
+          maxLength: 30
+        lastName:
+          type: string
+          maxLength: 30
+        address:
+          type: string
+          maxLength: 100
+        city:
+          type: string
+          maxLength: 50
+        zipCode:
+          type: string
+          maxLength: 15
+        telephone:
+          type: string
+          maxLength: 10
+        email:
+          type: string
+          maxLength: 100
+        adminDate:
+          type: string
+          format: date
+        salary:
+          type: number
+          format: double
+        deptId:
+          type: integer
+        password:
+          type: string
+          description: Plain password (will be encrypted)
+
+    EmployeeUpdateRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          maxLength: 30
+        lastName:
+          type: string
+          maxLength: 30
+        address:
+          type: string
+          maxLength: 100
+        city:
+          type: string
+          maxLength: 50
+        zipCode:
+          type: string
+          maxLength: 15
+        telephone:
+          type: string
+          maxLength: 10
+        email:
+          type: string
+          maxLength: 100
+        salary:
+          type: number
+          format: double
+        deptId:
+          type: integer
+
+    Flight:
+      type: object
+      properties:
+        flightId:
+          type: integer
+          example: 123
+        flightNum:
+          type: string
+          maxLength: 6
+          example: "CB1104"
+        flightDate:
+          type: string
+          format: date
+          example: "2025-11-15"
+        depTime:
+          type: string
+          format: time
+          example: "10:00:00"
+        arrTime:
+          type: string
+          format: time
+          example: "12:30:00"
+        airportDep:
+          type: string
+          maxLength: 4
+          example: "CDG"
+        airportArr:
+          type: string
+          maxLength: 4
+          example: "FCO"
+        availableSeats:
+          type: integer
+          description: Calculated available seats
+          example: 45
+
+    FlightDetail:
+      allOf:
+        - $ref: '#/components/schemas/Flight'
+        - type: object
+          properties:
+            totPass:
+              type: integer
+              example: 150
+            totBaggage:
+              type: integer
+              example: 200
+            shiftId:
+              type: integer
+              example: 5
+            airplaneId:
+              type: string
+              maxLength: 8
+              example: "BOEING01"
+            airplane:
+              $ref: '#/components/schemas/Airplane'
+            airportDepDetail:
+              $ref: '#/components/schemas/Airport'
+            airportArrDetail:
+              $ref: '#/components/schemas/Airport'
+
+    FlightCreateRequest:
+      type: object
+      required:
+        - flightNum
+        - flightDate
+        - depTime
+        - arrTime
+        - airplaneId
+        - airportDep
+        - airportArr
+        - shiftId
+      properties:
+        flightNum:
+          type: string
+          maxLength: 6
+        flightDate:
+          type: string
+          format: date
+        depTime:
+          type: string
+          format: time
+        arrTime:
+          type: string
+          format: time
+        airplaneId:
+          type: string
+          maxLength: 8
+        airportDep:
+          type: string
+          maxLength: 4
+        airportArr:
+          type: string
+          maxLength: 4
+        shiftId:
+          type: integer
+
+    FlightUpdateRequest:
+      type: object
+      properties:
+        flightDate:
+          type: string
+          format: date
+        depTime:
+          type: string
+          format: time
+        arrTime:
+          type: string
+          format: time
+        airportDep:
+          type: string
+          maxLength: 4
+        airportArr:
+          type: string
+          maxLength: 4
+
+    FlightSearchResponse:
+      type: object
+      properties:
+        flights:
+          type: array
+          items:
+            $ref: '#/components/schemas/Flight'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Passenger:
+      type: object
+      properties:
+        clientId:
+          type: integer
+          example: 1001
+        firstName:
+          type: string
+          maxLength: 30
+          example: "John"
+        lastName:
+          type: string
+          maxLength: 30
+          example: "Doe"
+        address:
+          type: string
+          maxLength: 250
+          example: "123 Main Street"
+        city:
+          type: string
+          maxLength: 50
+          example: "Paris"
+        country:
+          type: string
+          maxLength: 30
+          example: "France"
+        zipCode:
+          type: string
+          maxLength: 15
+          example: "75001"
+        telephone:
+          type: string
+          maxLength: 18
+          example: "+33123456789"
+        email:
+          type: string
+          maxLength: 100
+          example: "john.doe@email.com"
+
+    PassengerCreateRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - address
+        - city
+        - country
+        - zipCode
+        - telephone
+        - email
+      properties:
+        firstName:
+          type: string
+          maxLength: 30
+        lastName:
+          type: string
+          maxLength: 30
+        address:
+          type: string
+          maxLength: 250
+        city:
+          type: string
+          maxLength: 50
+        country:
+          type: string
+          maxLength: 30
+        zipCode:
+          type: string
+          maxLength: 15
+        telephone:
+          type: string
+          maxLength: 18
+        email:
+          type: string
+          maxLength: 100
+
+    PassengerUpdateRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          maxLength: 30
+        lastName:
+          type: string
+          maxLength: 30
+        address:
+          type: string
+          maxLength: 250
+        city:
+          type: string
+          maxLength: 50
+        country:
+          type: string
+          maxLength: 30
+        zipCode:
+          type: string
+          maxLength: 15
+        telephone:
+          type: string
+          maxLength: 18
+        email:
+          type: string
+          maxLength: 100
+
+    Ticket:
+      type: object
+      properties:
+        ticketId:
+          type: string
+          maxLength: 10
+          example: "TKT0000001"
+        seatNum:
+          type: string
+          maxLength: 3
+          example: "12A"
+        clientId:
+          type: integer
+          example: 1001
+        flightId:
+          type: integer
+          example: 123
+
+    TicketDetail:
+      allOf:
+        - $ref: '#/components/schemas/Ticket'
+        - type: object
+          properties:
+            passenger:
+              $ref: '#/components/schemas/Passenger'
+            flight:
+              $ref: '#/components/schemas/FlightDetail'
+            transaction:
+              $ref: '#/components/schemas/Transaction'
+
+    TicketSearchResponse:
+      type: object
+      properties:
+        tickets:
+          type: array
+          items:
+            $ref: '#/components/schemas/TicketDetail'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    BookingRequest:
+      type: object
+      required:
+        - clientId
+        - flightNum
+        - flightDate
+        - passengerCount
+        - passengerDetails
+      properties:
+        clientId:
+          type: integer
+          description: Main passenger/client ID
+          example: 1001
+        flightNum:
+          type: string
+          maxLength: 6
+          example: "CB1104"
+        flightDate:
+          type: string
+          format: date
+          example: "2025-11-15"
+        passengerCount:
+          type: integer
+          minimum: 1
+          description: Number of passengers
+          example: 2
+        passengerDetails:
+          type: array
+          description: Details for each passenger (may include new passengers)
+          items:
+            type: object
+            properties:
+              firstName:
+                type: string
+                maxLength: 30
+              lastName:
+                type: string
+                maxLength: 30
+              seatNum:
+                type: string
+                maxLength: 3
+                description: Optional - auto-assigned if not provided
+              clientId:
+                type: integer
+                description: Required if passenger exists, omit if new
+              address:
+                type: string
+                description: Required if new passenger
+              city:
+                type: string
+                description: Required if new passenger
+              country:
+                type: string
+                description: Required if new passenger
+              zipCode:
+                type: string
+                description: Required if new passenger
+              telephone:
+                type: string
+                description: Required if new passenger
+              email:
+                type: string
+                description: Required if new passenger
+        paymentMethod:
+          type: string
+          enum: [CARD, CASH, CHECK]
+          example: "CARD"
+
+    BookingResponse:
+      type: object
+      properties:
+        transactionId:
+          type: integer
+          example: 5001
+        totalPrice:
+          type: number
+          format: double
+          example: 241.98
+        tickets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ticket'
+        receiptUrl:
+          type: string
+          format: uri
+          example: "/api/transactions/5001/receipt"
+
+    Transaction:
+      type: object
+      properties:
+        transactionId:
+          type: integer
+          example: 5001
+        purchaseDate:
+          type: string
+          format: date
+          example: "2025-11-02"
+        purchaseTime:
+          type: string
+          format: time
+          example: "14:30:00"
+        price:
+          type: number
+          format: double
+          example: 241.98
+        employeeId:
+          type: string
+          maxLength: 8
+          example: "EMP00001"
+        clientId:
+          type: integer
+          example: 1001
+        tickets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ticket'
+
+    Airport:
+      type: object
+      properties:
+        airportId:
+          type: string
+          maxLength: 4
+          example: "CDG"
+        name:
+          type: string
+          maxLength: 100
+          example: "Charles de Gaulle Airport"
+        address:
+          type: string
+          maxLength: 250
+          example: "95700 Roissy-en-France"
+        city:
+          type: string
+          maxLength: 30
+          example: "Paris"
+        country:
+          type: string
+          maxLength: 30
+          example: "France"
+        zipCode:
+          type: string
+          maxLength: 15
+          example: "95700"
+
+    Airplane:
+      type: object
+      properties:
+        airplaneId:
+          type: string
+          maxLength: 8
+          example: "BOEING01"
+        type:
+          type: string
+          maxLength: 8
+          example: "737-800"
+        numSeats:
+          type: integer
+          example: 189
+        fuelCapacity:
+          type: integer
+          example: 26000
+
+    Pagination:
+      type: object
+      properties:
+        currentPage:
+          type: integer
+          example: 1
+        totalPages:
+          type: integer
+          example: 5
+        totalRecords:
+          type: integer
+          example: 100
+        pageSize:
+          type: integer
+          example: 20
+
