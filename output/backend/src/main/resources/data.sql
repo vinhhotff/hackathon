@@ -61,13 +61,24 @@ INSERT INTO passenger (clientid, firstname, lastname, address, city, country, zi
 (1005, 'Jean', 'Bernard', '30 Rue de Vaugirard', 'Paris', 'France', '75015', '+33123456793', 'jean.bernard@email.com'),
 (1006, 'Isabelle', 'Moreau', '12 Place Vendome', 'Paris', 'France', '75001', '+33123456794', 'isabelle.moreau@email.com'),
 (1007, 'Luc', 'Petit', '45 Rue de la Republique', 'Lyon', 'France', '69001', '+33456789123', 'luc.petit@email.com'),
-(1008, 'Camille', 'Roux', '22 Cours Mirabeau', 'Aix-en-Provence', 'France', '13100', '+33456789124', 'camille.roux@email.com');
+(1008, 'Camille', 'Roux', '22 Cours Mirabeau', 'Aix-en-Provence', 'France', '13100', '+33456789124', 'camille.roux@email.com'),
+(1009, 'Thomas', 'Garcia', '78 Rue de la Republique', 'Marseille', 'France', '13001', '+33456789125', 'thomas.garcia@email.com'),
+(1010, 'Emma', 'Lopez', '90 Boulevard Haussmann', 'Paris', 'France', '75008', '+33123456795', 'emma.lopez@email.com'),
+(1011, 'Lucas', 'Muller', '123 Avenue des Ternes', 'Paris', 'France', '75017', '+33123456796', 'lucas.muller@email.com');
 
 -- Transactions
 INSERT INTO transaction (achatid, purchase_date, purchase_time, price, employeeid, clientid) VALUES
 (5001, '2025-11-02', '10:30:00', 241.98, 'EMP00001', 1001),
 (5002, '2025-11-02', '11:15:00', 120.99, 'EMP00004', 1002),
-(5003, '2025-11-02', '14:20:00', 362.97, 'EMP00001', 1003);
+(5003, '2025-11-02', '14:20:00', 362.97, 'EMP00001', 1003),
+-- Account 1009: 4 vé (4 × 120.99 = 483.96)
+(5004, '2025-11-03', '09:00:00', 483.96, 'EMP00001', 1009),
+-- Account 1010: 5 vé (5 × 120.99 = 604.95)
+(5005, '2025-11-03', '10:15:00', 604.95, 'EMP00004', 1010),
+-- Account 1011: 3 vé (3 × 120.99 = 362.97)
+(5006, '2025-11-03', '11:30:00', 362.97, 'EMP00001', 1011),
+-- Account 1009: thêm 3 vé nữa (tổng 7 vé cho account này)
+(5007, '2025-11-04', '14:00:00', 362.97, 'EMP00001', 1009);
 
 -- Tickets
 INSERT INTO ticket (ticketid, buyid, clientid, flightid, seatnum) VALUES
@@ -76,5 +87,24 @@ INSERT INTO ticket (ticketid, buyid, clientid, flightid, seatnum) VALUES
 ('TKT0000003', 5002, 1002, 1, '15C'),
 ('TKT0000004', 5003, 1003, 2, '8A'),
 ('TKT0000005', 5003, 1003, 2, '8B'),
-('TKT0000006', 5003, 1003, 2, '8C');
+('TKT0000006', 5003, 1003, 2, '8C'),
+-- Account 1009: 4 vé cho flight 1 (transaction 5004)
+('TKT0000007', 5004, 1009, 1, '3A'),
+('TKT0000008', 5004, 1009, 1, '3B'),
+('TKT0000009', 5004, 1009, 1, '3C'),
+('TKT0000010', 5004, 1009, 1, '3D'),
+-- Account 1010: 5 vé cho flight 2 (transaction 5005)
+('TKT0000011', 5005, 1010, 2, '5A'),
+('TKT0000012', 5005, 1010, 2, '5B'),
+('TKT0000013', 5005, 1010, 2, '5C'),
+('TKT0000014', 5005, 1010, 2, '5D'),
+('TKT0000015', 5005, 1010, 2, '5E'),
+-- Account 1011: 3 vé cho flight 3 (transaction 5006)
+('TKT0000016', 5006, 1011, 3, '7A'),
+('TKT0000017', 5006, 1011, 3, '7B'),
+('TKT0000018', 5006, 1011, 3, '7C'),
+-- Account 1009: thêm 3 vé nữa cho flight 4 (transaction 5007) - tổng 7 vé cho account này
+('TKT0000019', 5007, 1009, 4, '9A'),
+('TKT0000020', 5007, 1009, 4, '9B'),
+('TKT0000021', 5007, 1009, 4, '9C');
 

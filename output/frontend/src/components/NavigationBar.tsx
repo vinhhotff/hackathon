@@ -1,10 +1,19 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { 
+  FaSearch, 
+  FaPlane, 
+  FaTicketAlt, 
+  FaUsers, 
+  FaSignOutAlt, 
+  FaUserCircle 
+} from 'react-icons/fa';
 
 const NavigationBar: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
@@ -15,18 +24,57 @@ const NavigationBar: React.FC = () => {
     return null;
   }
 
+  const isActive = (path: string) => location.pathname === path;
+
+  const navLinks = [
+    { path: '/flights', label: 'Search Flight', icon: FaSearch },
+    { path: '/booking', label: 'Booking', icon: FaPlane },
+    { path: '/tickets', label: 'Search Ticket', icon: FaTicketAlt },
+    { path: '/customers', label: 'Customer', icon: FaUsers },
+  ];
+
   return (
-    <nav className="bg-blue-600 text-white p-4">
-      <div className="container mx-auto flex justify-between items-center">
-        <div className="flex gap-4">
-          <Link to="/flights" className="hover:underline">Search Flight</Link>
-          <Link to="/booking" className="hover:underline">Booking</Link>
-          <Link to="/tickets" className="hover:underline">Search Ticket</Link>
-          <Link to="/customers" className="hover:underline">Customer</Link>
-        </div>
-        <div className="flex items-center gap-4">
-          <span>{user.firstName} {user.lastName} ({user.empId})</span>
-          <button onClick={handleLogout} className="hover:underline">Logout</button>
+    <nav className="bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex items-center space-x-1">
+            <FaPlane className="text-2xl mr-2" />
+            <span className="text-xl font-bold">COBOL Airlines</span>
+          </div>
+          
+          <div className="flex items-center space-x-1">
+            {navLinks.map(({ path, label, icon: Icon }) => (
+              <Link
+                key={path}
+                to={path}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                  isActive(path)
+                    ? 'bg-white text-blue-600 shadow-md'
+                    : 'hover:bg-blue-500 hover:shadow-sm'
+                }`}
+              >
+                <Icon className="text-sm" />
+                <span className="text-sm font-medium">{label}</span>
+              </Link>
+            ))}
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 bg-blue-500 px-4 py-2 rounded-lg">
+              <FaUserCircle className="text-lg" />
+              <div className="flex flex-col">
+                <span className="text-xs font-medium">{user.firstName} {user.lastName}</span>
+                <span className="text-xs opacity-80">{user.empId}</span>
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+            >
+              <FaSignOutAlt />
+              <span className="text-sm font-medium">Logout</span>
+            </button>
+          </div>
         </div>
       </div>
     </nav>
